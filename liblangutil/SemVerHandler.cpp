@@ -31,6 +31,7 @@
 using namespace std;
 using namespace solidity;
 using namespace solidity::langutil;
+using namespace solidity::util;
 
 SemVerMatchExpressionParser::SemVerMatchExpressionParser(vector<Token> _tokens, vector<string> _literals):
 	m_tokens(std::move(_tokens)), m_literals(std::move(_literals))
@@ -240,8 +241,12 @@ SemVerMatchExpression::MatchComponent SemVerMatchExpressionParser::parseMatchCom
 		component.levelsPresent++;
 		if (currentChar() == '.')
 			nextChar();
-		else
+		else if (currentChar() == char(-1)) // EOF
 			break;
+		else if (contains("|<>=^~- 0123456789"sv, currentChar()))
+			break; // beginning of a new version component
+		else
+			throw SemVerError();
 	}
 	// TODO we do not support pre and build version qualifiers for now in match expressions
 	// (but we do support them in the actual versions)

@@ -14,7 +14,7 @@ Bugfixes:
  * Commandline Interface: Fix extra newline character being appended to sources passed through standard input, affecting their hashes.
  * SMTChecker: Fix internal error in magic type access (``block``, ``msg``, ``tx``).
  * TypeChecker: Fix internal error when using user defined value types in public library functions.
-
+ * Parser: Properly reject misformatted version pragmas (e.g. ``^0^1`` was misparsed).
 
 
 
