@@ -686,10 +686,18 @@ void SMTEncoder::endVisit(FunctionCall const& _funCall)
 	case FunctionType::Kind::ObjectCreation:
 		visitObjectCreation(_funCall);
 		return;
+	case FunctionType::Kind::Creation:
+		if (!m_settings.engine.chc || !m_settings.externalCalls.isTrusted())
+			m_errorReporter.warning(
+				8729_error,
+				_funCall.location(),
+				"Contract deployment is only supported in the trusted mode for external calls"
+				" with the CHC engine."
+			);
+		break;
 	case FunctionType::Kind::DelegateCall:
 	case FunctionType::Kind::BareCallCode:
 	case FunctionType::Kind::BareDelegateCall:
-	case FunctionType::Kind::Creation:
 	default:
 		m_errorReporter.warning(
 			4588_error,
@@ -2758,6 +2766,16 @@ MemberAccess const* SMTEncoder::isEmptyPush(Expression const& _expr) const
 	return nullptr;
 }
 
+smtutil::Expression SMTEncoder::contractAddressValue(FunctionCall const& _f)
+{
+	FunctionType const& funType = dynamic_cast<FunctionType const&>(*_f.expression().annotation().type);
+	if (funType.kind() == FunctionType::Kind::Internal)
+		return state().thisAddress();
+	if (MemberAccess const* callBase = dynamic_cast<MemberAccess const*>(&_f.expression()))
+		return expr(callBase->expression());
+	solAssert(false, "Unreachable!");
+}
+
 bool SMTEncoder::isPublicGetter(Expression const& _expr) {
 	if (!isTrustedExternalCall(&_expr))
 		return false;
@@ -3029,7 +3047,7 @@ RationalNumberType const* SMTEncoder::isConstant(Expression const& _expr)
 	return nullptr;
 }
 
-set<FunctionCall const*> SMTEncoder::collectABICalls(ASTNode const* _node)
+set<FunctionCall const*, ASTCompareByID<FunctionCall>> SMTEncoder::collectABICalls(ASTNode const* _node)
 {
 	struct ABIFunctions: public ASTConstVisitor
 	{
@@ -3050,7 +3068,7 @@ set<FunctionCall const*> SMTEncoder::collectABICalls(ASTNode const* _node)
 				}
 		}
 
-		set<FunctionCall const*> abiCalls;
+		set<FunctionCall const*, ASTCompareByID<FunctionCall>> abiCalls;
 	};
 
 	return ABIFunctions(_node).abiCalls;

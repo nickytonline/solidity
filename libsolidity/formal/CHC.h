@@ -111,9 +111,12 @@ private:
 
 	void visitAssert(FunctionCall const& _funCall);
 	void visitAddMulMod(FunctionCall const& _funCall) override;
+	void visitDeployment(FunctionCall const& _funCall);
 	void internalFunctionCall(FunctionCall const& _funCall);
 	void externalFunctionCall(FunctionCall const& _funCall);
 	void externalFunctionCallToTrustedCode(FunctionCall const& _funCall);
+	void addNondetCalls(ContractDefinition const& _contract);
+	void nondetCall(ContractDefinition const& _contract, VariableDeclaration const& _var);
 	void unknownFunctionCall(FunctionCall const& _funCall);
 	void makeArrayPopVerificationTarget(FunctionCall const& _arrayPop) override;
 	void makeOutOfBoundsVerificationTarget(IndexAccess const& _access) override;
@@ -135,6 +138,7 @@ private:
 	void clearIndices(ContractDefinition const* _contract, FunctionDefinition const* _function = nullptr) override;
 	void setCurrentBlock(Predicate const& _block);
 	std::set<unsigned> transactionVerificationTargetsIds(ASTNode const* _txRoot);
+	bool usesStaticCall(FunctionCall const& _funCall);
 	//@}
 
 	/// SMT Natspec and abstraction helpers.
@@ -148,6 +152,10 @@ private:
 	/// @returns true if _function is Natspec annotated to be abstracted by
 	/// nondeterministic values.
 	bool abstractAsNondet(FunctionDefinition const& _function);
+
+	/// @returns true if external calls should be considered trusted.
+	/// If that's the case, their code is used if available at compile time.
+	bool externalCallsIsTrustedMode();
 	//@}
 
 	/// Sort helpers.
@@ -232,6 +240,7 @@ private:
 	/// @returns a predicate that defines a function summary.
 	smtutil::Expression summary(FunctionDefinition const& _function);
 	smtutil::Expression summary(FunctionDefinition const& _function, ContractDefinition const& _contract);
+
 	/// @returns a predicate that applies a function summary
 	/// over the constrained variables.
 	smtutil::Expression summaryCall(FunctionDefinition const& _function);
@@ -308,6 +317,10 @@ private:
 	unsigned newErrorId();
 
 	smt::SymbolicIntVariable& errorFlag();
+
+	/// Adds to the solver constraints that propagate tx.origin and
+	/// set the current contract as msg.sender.
+	void newTxConstraints();
 	//@}
 
 	/// Predicates.
