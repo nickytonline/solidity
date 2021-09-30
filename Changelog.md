@@ -7,6 +7,7 @@ Compiler Features:
 
 
 Bugfixes:
+ * Commandline Interface: Report output selection options unsupported by the selected input mode instead of ignoring them.
 
 
 
