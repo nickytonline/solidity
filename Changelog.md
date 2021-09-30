@@ -4,6 +4,7 @@ Language Features:
 
 
 Compiler Features:
+ * Commandline Interface: Support ``--asm``, ``--bin``, ``--ir-optimized`` and ``--ewasm`` output selection options in assembler mode.
 
 
 Bugfixes:
