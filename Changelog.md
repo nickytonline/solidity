@@ -6,6 +6,7 @@ Language Features:
 
 Compiler Features:
  * SMTChecker: Output values for ``block.*``, ``msg.*`` and ``tx.*`` variables that are present in the called functions.
+ * TypeChecker: Improve error message in implicit function type conversions failures from and to error() type.
 
 
 Bugfixes:
