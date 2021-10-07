@@ -35,7 +35,7 @@ void ControlFlowBuilder::operator()(FunctionCall const& _functionCall)
 {
 	walkVector(_functionCall.arguments | ranges::views::reverse);
 	newConnectedNode();
-	m_currentNode->functionCall = {_functionCall.functionName.name};
+	m_currentNode->functionCall = _functionCall.functionName.name;
 }
 
 void ControlFlowBuilder::operator()(If const& _if)
@@ -89,10 +89,10 @@ void ControlFlowBuilder::operator()(FunctionDefinition const& _function)
 
 void ControlFlowBuilder::operator()(ForLoop const& _for)
 {
-	(*this)(_for.pre);
-
 	ScopedSaveAndRestore scopedBreakNode(m_break, nullptr);
 	ScopedSaveAndRestore scopedContinueNode(m_continue, nullptr);
+
+	(*this)(_for.pre);
 
 	ControlFlowNode* breakNode = newNode();
 	m_break = breakNode;
