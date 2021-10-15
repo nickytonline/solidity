@@ -1,3 +1,5 @@
+image:
+  file: .gitpod.Dockerfile
 tasks:
 # Based off of https://docs.soliditylang.org/en/latest/installing-solidity.html#building-from-source
 # Note the Gitpod container image already includes:
@@ -10,5 +12,6 @@ tasks:
 
   - name: Install deps and build Solidity
     init: |
+      sudo apt-add-repository -y ppa:hvr/z3
       sudo apt-get -y update
       sudo apt-get -y install build-essential libboost-all-dev libz3-dev
